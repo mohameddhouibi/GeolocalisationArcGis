@@ -2,7 +2,6 @@ package com.muhameddhouibi.geo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -23,54 +22,56 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 
-public class FirstActivity extends AppCompatActivity {
+public class SecondActivity extends AppCompatActivity {
+    SlidrInterface sldr ;
     private MapView mMapView;
     private GraphicsOverlay mGraphicsOverlay;
     private Button btnStreet ;
     private Button btnImagerie ;
     private Button btnTopographie ;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_first);
-        mMapView = findViewById(R.id.mapView);
+        setContentView(R.layout.activity_second);
+        btnStreet = findViewById(R.id.Street2);
+        btnImagerie = findViewById(R.id.IMAGERY2);
+        btnTopographie = findViewById(R.id.TOPOGRAPHIC2);
+        sldr = Slidr.attach(this);
 
-        btnStreet = findViewById(R.id.Street);
-        btnImagerie = findViewById(R.id.IMAGERY);
-        btnTopographie = findViewById(R.id.TOPOGRAPHIC);
 
         btnStreet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(FirstActivity.this,FirstActivity.class);
+                Intent i = new Intent(SecondActivity.this,FirstActivity.class);
                 startActivity(i);
             }
         });
         btnImagerie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(FirstActivity.this,SecondActivity.class);
+                Intent i = new Intent(SecondActivity.this,SecondActivity.class);
                 startActivity(i);
             }
         });
         btnTopographie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(FirstActivity.this,ThirdActivity.class);
+                Intent i = new Intent(SecondActivity.this,ThirdActivity.class);
                 startActivity(i);
             }
         });
+
+
+        mMapView = findViewById(R.id.mapView);
         setupMap();
         createGraphicsOverlay();
         createPointGraphics();
         createPolylineGraphics();
         createPolygonGraphics();
     }
-
-
-
     private void createGraphicsOverlay() {
         mGraphicsOverlay = new GraphicsOverlay();
         mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
@@ -78,12 +79,13 @@ public class FirstActivity extends AppCompatActivity {
 
     private void setupMap() {
         if (mMapView != null) {
-            Basemap.Type basemapType = Basemap.Type.STREETS;
+            Basemap.Type basemapType = Basemap.Type.IMAGERY;
             double latitude = 36.813102;
             double longitude = 10.129154;
             int levelOfDetail = 13;
             ArcGISMap map = new ArcGISMap(basemapType, latitude, longitude, levelOfDetail);
             ArcGISRuntimeEnvironment.setLicense(getResources().getString(R.string.arcgis_license_key));
+
             mMapView.setMap(map);
         }
     }
@@ -114,8 +116,6 @@ public class FirstActivity extends AppCompatActivity {
 
     private void createPointGraphics() {
         Point point = new Point(36.8279039, 10.1505018, SpatialReferences.getWgs84());
-        //mMapView.setOnClickListener();
-
         SimpleMarkerSymbol pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.rgb(226, 119, 40), 10.0f);
         pointSymbol.setOutline(new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 2.0f));
         Graphic pointGraphic = new Graphic(point, pointSymbol);
@@ -149,6 +149,5 @@ public class FirstActivity extends AppCompatActivity {
         Graphic polygonGraphic = new Graphic(polygon, polygonSymbol);
         mGraphicsOverlay.getGraphics().add(polygonGraphic);
     }
-
 
 }
