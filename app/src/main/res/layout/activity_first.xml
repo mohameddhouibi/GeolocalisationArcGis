@@ -1,46 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".FirstActivity">
-<LinearLayout
-    android:id="@+id/linear"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:weightSum= "3"
-    >
+    android:layout_height="match_parent">
+
+    <!-- MapView -->
+    <Button
+        android:id="@+id/streets"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/colorWhite"
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Rue"></Button>
 
     <Button
-        android:id="@+id/Street"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:id="@+id/imagerie"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/streets"
+        android:textColor="@color/colorWhite"
 
-        android:text="Street "></Button>
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Imagerie"></Button>
+
     <Button
-        android:id="@+id/IMAGERY"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:id="@+id/topo"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="12dp"
+        android:layout_toRightOf="@+id/imagerie"
+        android:textColor="@color/colorWhite"
 
-        android:text="IMAGERY "></Button>
-    <Button
-        android:id="@+id/TOPOGRAPHIC"
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-
-        android:text="TOPOGRAPHIC "></Button>
-</LinearLayout>
-
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Topographie"></Button>
     <com.esri.arcgisruntime.mapping.view.MapView
-        android:layout_below="@+id/linear"
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </com.esri.arcgisruntime.mapping.view.MapView>
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/menu_undo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_undo"
+        />
+    <ImageView
+        android:id="@+id/menu_stop"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_stop"
+        android:layout_centerHorizontal="true"
+        />
+
+    <ImageView
+        android:id="@+id/menu_redo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_redo" />
+
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/point_line_polygon_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
 </RelativeLayout>

@@ -1,115 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ThirdActivity">
-
+    android:layout_height="match_parent">
 
     <!-- MapView -->
+    <Button
+        android:id="@+id/streets"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/colorWhite"
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Rue"></Button>
+
+    <Button
+        android:id="@+id/imagerie"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/streets"
+        android:textColor="@color/colorWhite"
+
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Imagerie"></Button>
+
+    <Button
+        android:id="@+id/topo"
+        android:layout_width="122dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="12dp"
+        android:layout_toRightOf="@+id/imagerie"
+        android:textColor="@color/colorWhite"
+
+        android:background="@drawable/cornerbutton3"
+        android:fontFamily="@font/montserrat"
+        android:text="Topographie"></Button>
     <com.esri.arcgisruntime.mapping.view.MapView
         android:id="@+id/mapView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintHorizontal_bias="0.0"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/gridView">
-    </com.esri.arcgisruntime.mapping.view.MapView>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
-    <GridLayout
-        android:id="@+id/gridView"
-        android:layout_width="0dp"
+    <ImageView
+        android:id="@+id/menu_undo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_undo"
+        />
+    <ImageView
+        android:id="@+id/menu_stop"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_stop"
+        android:layout_centerHorizontal="true"
+        />
+
+    <ImageView
+        android:id="@+id/menu_redo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/toolbarInclude"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:src="@drawable/ic_menu_redo" />
+
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/point_line_polygon_toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:columnCount="2"
-        android:orientation="horizontal"
-        android:padding="@dimen/coordinate_grid_padding"
-        android:rowCount="5"
+        android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapView">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <TextView
-            android:layout_column="0"
-            android:layout_gravity="end|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="0"
-            android:text="@string/latlong_dd_label"
-            android:textAlignment="textEnd"/>
 
-        <TextView
-            android:layout_column="0"
-            android:layout_gravity="end|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="1"
-            android:text="@string/latlong_dms_label"
-            android:textAlignment="textEnd"/>
-
-        <TextView
-            android:layout_column="0"
-            android:layout_gravity="end|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="2"
-            android:text="@string/utm_label"
-            android:textAlignment="textEnd"/>
-
-        <TextView
-            android:layout_column="0"
-            android:layout_gravity="end|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="3"
-            android:text="@string/usng_label"
-            android:textAlignment="textEnd"/>
-
-        <TextView
-            android:id="@+id/latLongDDNotation"
-            android:layout_column="1"
-            android:layout_gravity="start|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="0"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            />
-
-        <TextView
-            android:id="@+id/latLongDMSNotation"
-            android:layout_column="1"
-            android:layout_gravity="start|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="1"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            />
-
-        <TextView
-            android:id="@+id/utmNotation"
-            android:layout_column="1"
-            android:layout_gravity="start|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="2"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            />
-
-        <TextView
-            android:id="@+id/usngNotation"
-            android:layout_column="1"
-            android:layout_gravity="start|top"
-            android:layout_margin="@dimen/coordinate_text_margin"
-            android:layout_row="3"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            />
-
-    </GridLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

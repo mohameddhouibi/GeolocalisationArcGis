@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/toolbar_background">
+    android:background="@drawable/back_lin">
 
     <ImageButton
         android:contentDescription="@string/pointButtonDescription"
@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_point"
+        android:src="@drawable/point"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toStartOf="@+id/pointsButton"/>
@@ -28,7 +28,7 @@
         android:layout_toEndOf="@+id/pointButton"
         android:layout_toRightOf="@+id/pointButton"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_multipoint"
+        android:src="@drawable/multipoint"
         app:layout_constraintStart_toEndOf="@+id/pointButton"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toStartOf="@+id/polylineButton"/>
@@ -41,7 +41,7 @@
         android:layout_toEndOf="@+id/pointsButton"
         android:layout_toRightOf="@+id/pointsButton"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_polyline"
+        android:src="@drawable/polyline"
         app:layout_constraintStart_toEndOf="@+id/pointsButton"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toStartOf="@+id/polygonButton"/>
@@ -54,7 +54,7 @@
         android:layout_toEndOf="@+id/polylineButton"
         android:layout_toRightOf="@+id/polylineButton"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_polygon"
+        android:src="@drawable/polygon"
         app:layout_constraintStart_toEndOf="@+id/polylineButton"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toStartOf="@+id/freehandLineButton"/>
@@ -67,7 +67,7 @@
         android:layout_toEndOf="@+id/freehandLineButton"
         android:layout_toRightOf="@+id/freehandLineButton"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_freehand_polygon"
+        android:src="@drawable/freehand_polygon"
         app:layout_constraintStart_toEndOf="@+id/freehandLineButton"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp" app:layout_constraintHorizontal_bias="0.5"/>
@@ -80,7 +80,7 @@
         android:layout_toEndOf="@+id/polygonButton"
         android:layout_toRightOf="@+id/polygonButton"
         android:layout_width="wrap_content"
-        android:src="@drawable/ic_action_freehand_polyline"
+        android:src="@drawable/freehand_polyline"
         app:layout_constraintStart_toEndOf="@+id/polygonButton"
         app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toStartOf="@+id/freehandPolygonButton"/>

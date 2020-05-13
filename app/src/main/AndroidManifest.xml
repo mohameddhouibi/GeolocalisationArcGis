@@ -10,13 +10,13 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logoo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ThirdActivity" android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
-        <activity android:name=".SecondActivity" />
+        <activity android:name=".SecondActivity"  android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".FirstActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

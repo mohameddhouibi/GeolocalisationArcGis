@@ -47,12 +47,12 @@
 
     <Button
         android:id="@+id/btn_get_started"
-        android:layout_width="190dp"
-        android:layout_height="wrap_content"
+        android:layout_width="250dp"
+        android:layout_height="60dp"
         android:layout_alignBottom="@+id/screen_viewpager"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="65dp"
-        android:background="@drawable/bt_back"
+        android:background="@drawable/cornerbutton1"
         android:fontFamily="@font/montserrat"
         android:text="Get Started"
         android:textColor="#fff"

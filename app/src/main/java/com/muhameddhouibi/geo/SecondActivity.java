@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -65,6 +66,8 @@ public class SecondActivity extends AppCompatActivity {
     private ImageButton mPolygonButton;
     private ImageButton mFreehandLineButton;
     private ImageButton mFreehandPolygonButton;
+    private Button bt1 , bt2 , bt3 ;
+    private ImageView i1 ,i2,i3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +82,7 @@ public class SecondActivity extends AppCompatActivity {
         // inflate map view from layout
         mMapView = findViewById(R.id.mapView);
         // create a map with the Basemap Type topographic
-        ArcGISMap map = new ArcGISMap(Basemap.Type.LIGHT_GRAY_CANVAS, 34.056295, -117.195800, 16);
+        ArcGISMap map = new ArcGISMap(Basemap.Type.IMAGERY, 36.7472781, 10.1031301, 16);
         // set the map to be displayed in this view
         mMapView.setMap(map);
 
@@ -97,6 +100,82 @@ public class SecondActivity extends AppCompatActivity {
         mPolygonButton = findViewById(R.id.polygonButton);
         mFreehandLineButton = findViewById(R.id.freehandLineButton);
         mFreehandPolygonButton = findViewById(R.id.freehandPolygonButton);
+        bt1 = findViewById(R.id.streets);
+        bt2 = findViewById(R.id.imagerie);
+        bt3 = findViewById(R.id.topo);
+        i1=findViewById(R.id.menu_undo);
+        i2=findViewById(R.id.menu_stop);
+        i3=findViewById(R.id.menu_redo);
+        bt2.setEnabled(true);
+        bt1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(SecondActivity.this,FirstActivity.class);
+                startActivity(i);
+            }
+        });
+
+        bt3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(SecondActivity.this,ThirdActivity.class);
+                startActivity(i);
+            }
+        });
+
+        i1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSketchEditor.canUndo()) {
+                    mSketchEditor.undo();
+                }
+            }
+        });
+        i2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mSketchEditor.isSketchValid()) {
+                    reportNotValid();
+                    mSketchEditor.stop();
+                    resetButtons();
+                    return;
+                }
+
+                // get the geometry from sketch editor
+                Geometry sketchGeometry = mSketchEditor.getGeometry();
+                mSketchEditor.stop();
+                resetButtons();
+
+                if (sketchGeometry != null) {
+
+                    // create a graphic from the sketch editor geometry
+                    Graphic graphic = new Graphic(sketchGeometry);
+
+                    // assign a symbol based on geometry type
+                    if (graphic.getGeometry().getGeometryType() == GeometryType.POLYGON) {
+                        graphic.setSymbol(mFillSymbol);
+
+                    } else if (graphic.getGeometry().getGeometryType() == GeometryType.POLYLINE) {
+                        graphic.setSymbol(mLineSymbol);
+                    } else if (graphic.getGeometry().getGeometryType() == GeometryType.POINT ||
+                            graphic.getGeometry().getGeometryType() == GeometryType.MULTIPOINT) {
+                        graphic.setSymbol(mPointSymbol);
+                    }
+
+                    // add the graphic to the graphics overlay
+                    mGraphicsOverlay.getGraphics().add(graphic);
+                }
+            }
+        });
+        i3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSketchEditor.canRedo()) {
+                    mSketchEditor.redo();
+                }
+            }
+        });
+
 
         // add click listeners
         mPointButton.setOnClickListener(view -> createModePoint());
@@ -105,6 +184,12 @@ public class SecondActivity extends AppCompatActivity {
         mPolygonButton.setOnClickListener(view -> createModePolygon());
         mFreehandLineButton.setOnClickListener(view -> createModeFreehandLine());
         mFreehandPolygonButton.setOnClickListener(view -> createModeFreehandPolygon());
+
+
+
+
+
+
     }
 
     /**
@@ -211,6 +296,7 @@ public class SecondActivity extends AppCompatActivity {
             // assign a symbol based on geometry type
             if (graphic.getGeometry().getGeometryType() == GeometryType.POLYGON) {
                 graphic.setSymbol(mFillSymbol);
+
             } else if (graphic.getGeometry().getGeometryType() == GeometryType.POLYLINE) {
                 graphic.setSymbol(mLineSymbol);
             } else if (graphic.getGeometry().getGeometryType() == GeometryType.POINT ||
