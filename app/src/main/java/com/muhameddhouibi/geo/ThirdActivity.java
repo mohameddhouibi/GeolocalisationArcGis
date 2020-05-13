@@ -1,155 +1,285 @@
 package com.muhameddhouibi.geo;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.ArcGISRuntimeException;
+import com.esri.arcgisruntime.geometry.CoordinateFormatter;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
+import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.google.android.material.snackbar.Snackbar;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrInterface;
 
 public class ThirdActivity extends AppCompatActivity {
-    SlidrInterface sldr ;
 
     private MapView mMapView;
-    private GraphicsOverlay mGraphicsOverlay;
-    private Button btnStreet ;
-    private Button btnImagerie ;
-    private Button btnTopographie ;
+
+    // Graphic indicating coordinate location in the map
+    private Graphic coordinateLocation;
+
+    // TextViews containing coordinate notation strings
+    private TextView mLatLongDDValue;
+    private TextView mLatLongDMSValue;
+    private TextView mUtmValue;
+    private TextView mUSNGValue;
+
+    /**
+     * Coordinate notations supported by this sample
+     */
+    private enum NotationType {
+        DMS,
+        DD,
+        UTM,
+        USNG
+    }
+
+    /**
+     * Uses CoordinateFormatter to update the UI with coordinate notation strings based on the given Point.
+     * @param newLocation Point to convert to coordinate notations
+     */
+    private void toCoordinateNotationFromPoint(Point newLocation) {
+        if ((newLocation != null) && (! newLocation.isEmpty())) {
+            coordinateLocation.setGeometry(newLocation);
+
+            try {
+                // use CoordinateFormatter to convert to Latitude Longitude, formatted as Decimal Degrees
+                mLatLongDDValue.setText(CoordinateFormatter.toLatitudeLongitude(newLocation,
+                        CoordinateFormatter.LatitudeLongitudeFormat.DECIMAL_DEGREES, 4));
+
+                // use CoordinateFormatter to convert to Latitude Longitude, formatted as Degrees, Minutes, Seconds
+                mLatLongDMSValue.setText(CoordinateFormatter.toLatitudeLongitude(newLocation,
+                        CoordinateFormatter.LatitudeLongitudeFormat.DEGREES_MINUTES_SECONDS, 1));
+
+                // use CoordinateFormatter to convert to Universal Transverse Mercator, using latitudinal bands indicator
+                mUtmValue.setText(CoordinateFormatter.toUtm(newLocation,
+                        CoordinateFormatter.UtmConversionMode.LATITUDE_BAND_INDICATORS, true));
+
+                // use CoordinateFormatter to convert to United States National Grid (USNG)
+                mUSNGValue.setText(CoordinateFormatter.toUsng(newLocation, 4, true));
+            }
+            catch (ArcGISRuntimeException convertException) {
+                String message = String.format("%s Point at '%s'\n%s", getString(R.string.failed_convert),
+                        newLocation.toString(), convertException.getMessage());
+                Snackbar.make(mMapView, message, Snackbar.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Uses CoordinateFormatter to update the graphic in the map from the given coordinate notation string entered by the
+     * user. Also calls corresponding method to update all the remaining coordinate notation strings.
+     * @param type the given coordinate notation type
+     * @param coordinateNotation a string containing the coordinate notation to convert to a point
+     */
+    private void fromCoordinateNotationToPoint(NotationType type, String coordinateNotation) {
+        // ignore empty input coordinate notation strings, do not update UI
+        if (TextUtils.isEmpty(coordinateNotation)) return;
+
+        Point convertedPoint = null;
+        try {
+            switch (type) {
+                case DMS:
+                case DD:
+                    // use CoordinateFormatter to parse Latitude Longitude - different numeric notations (Decimal Degrees;
+                    // Degrees, Minutes, Seconds; Degrees, Decimal Minutes) can all be passed to this same method
+                    convertedPoint = CoordinateFormatter.fromLatitudeLongitude(coordinateNotation, null);
+                    break;
+                case UTM:
+                    // use CoordinateFormatter to parse UTM coordinates
+                    convertedPoint = CoordinateFormatter.fromUtm(coordinateNotation, null,
+                            CoordinateFormatter.UtmConversionMode.LATITUDE_BAND_INDICATORS);
+                    break;
+                case USNG:
+                    // use CoordinateFormatter to parse US National Grid coordinates
+                    convertedPoint = CoordinateFormatter.fromUsng(coordinateNotation, null);
+                    break;
+                default:
+                    Snackbar.make(mMapView, getString(R.string.unsupported_message), Snackbar.LENGTH_SHORT).show();
+                    break;
+            }
+
+            // update the location shown in the map
+            toCoordinateNotationFromPoint(convertedPoint);
+        }
+        catch (ArcGISRuntimeException convertException) {
+            String message = String.format("%s '%s'\n%s", getString(R.string.failed_convert), coordinateNotation,
+                    convertException.getMessage());
+            Snackbar.make(mMapView, message, Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Shows a dialog allowing a user to enter a coordinate string in the given notation, then parses that string into a
+     * Point displayed on the map, and also updates
+     * @param type indicates the type of coordinate notation to be entered into the editable text box in the dialog
+     * @param currentValue existing value of the coordinate, shown as default in the text box
+     */
+    private void showEnterCoordinateDialog(final NotationType type, final String currentValue) {
+        String title = "";
+        switch (type) {
+            case DMS:
+            case DD:
+                title = getString(R.string.enter_latlong_message);
+                break;
+            case UTM:
+                title = getString(R.string.enter_utm_message);
+                break;
+            case USNG:
+                title = getString(R.string.enter_usng_message);
+                break;
+            default:
+                Snackbar.make(mMapView, getString(R.string.unsupported_message), Snackbar.LENGTH_SHORT).show();
+                break;
+        }
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_coordinate, null);
+        dialogBuilder.setView(dialogView);
+        final EditText coordinateEditText = (EditText) dialogView.findViewById(R.id.coordinateNotation);
+        coordinateEditText.setText(currentValue);
+
+        dialogBuilder.setTitle(title)
+                .setCancelable(true)
+                .setPositiveButton(R.string.set_location, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        fromCoordinateNotationToPoint(type, coordinateEditText.getText().toString());
+                    }
+                });
+
+        // create and show the dialog.
+        dialogBuilder.create().show();
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_third);
-        btnStreet = findViewById(R.id.Street3);
-        btnImagerie = findViewById(R.id.IMAGERY3);
-        btnTopographie = findViewById(R.id.TOPOGRAPHIC3);
-        sldr = Slidr.attach(this);
 
-
-
-        btnStreet.setOnClickListener(new View.OnClickListener() {
+        // retrieve coordinate label views from the layout; set each to allow a user to enter a new coordinate string when
+        // the View is tapped
+        mLatLongDDValue = (TextView)findViewById(R.id.latLongDDNotation);
+        mLatLongDDValue.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ThirdActivity.this,FirstActivity.class);
-                startActivity(i);
+            public void onClick(View view) {
+                TextView currentValue = (TextView)view;
+                showEnterCoordinateDialog(NotationType.DD, currentValue.getText().toString());
             }
         });
-        btnImagerie.setOnClickListener(new View.OnClickListener() {
+        mLatLongDMSValue = (TextView)findViewById(R.id.latLongDMSNotation);
+        mLatLongDMSValue.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ThirdActivity.this,SecondActivity.class);
-                startActivity(i);
+            public void onClick(View view) {
+                TextView currentValue = (TextView)view;
+                showEnterCoordinateDialog(NotationType.DMS, currentValue.getText().toString());
             }
         });
-        btnTopographie.setOnClickListener(new View.OnClickListener() {
+        mUtmValue = (TextView)findViewById(R.id.utmNotation);
+        mUtmValue.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ThirdActivity.this,ThirdActivity.class);
-                startActivity(i);
+            public void onClick(View view) {
+                TextView currentValue = (TextView)view;
+                showEnterCoordinateDialog(NotationType.UTM, currentValue.getText().toString());
+            }
+        });
+        mUSNGValue = (TextView)findViewById(R.id.usngNotation);
+        mUSNGValue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextView currentValue = (TextView)view;
+                showEnterCoordinateDialog(NotationType.USNG, currentValue.getText().toString());
             }
         });
 
-        mMapView = findViewById(R.id.mapView);
-        setupMap();
-        createGraphicsOverlay();
-        createPointGraphics();
-        createPolylineGraphics();
-        createPolygonGraphics();
+        // retrieve the MapView from layout
+        mMapView = (MapView) findViewById(R.id.mapView);
+        // create a map that has the WGS 84 coordinate system and set this into the map
+        ArcGISTiledLayer basemapLayer = new ArcGISTiledLayer(getString(R.string.basemap_url));
+        Basemap wgs84Basemap = new Basemap(basemapLayer);
+        ArcGISMap map = new ArcGISMap(wgs84Basemap);
+        mMapView.setMap(map);
+
+        // set up a Graphic to indicate where the coordinates relate to, with an initial location
+        Point initialPoint = new Point(0,0, SpatialReferences.getWgs84());
+        coordinateLocation = new Graphic(initialPoint,
+        new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CROSS, Color.YELLOW, 20f));
+        mMapView.getGraphicsOverlays().add(new GraphicsOverlay());
+        mMapView.getGraphicsOverlays().get(0).getGraphics().add(coordinateLocation);
+        toCoordinateNotationFromPoint(initialPoint);
+
+        // set up a map touch listener that shows coordinates when a user taps on the map view
+        mMapView.setOnTouchListener(new ShowCoordinatesMapTouchListener(this, mMapView));
     }
 
-    private void createGraphicsOverlay() {
-        mGraphicsOverlay = new GraphicsOverlay();
-        mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
-    }
+    /**
+     * A map touch listener that updates formatted coordinates when a user taps on a location in the associated MapView.
+     */
+    private class ShowCoordinatesMapTouchListener extends DefaultMapViewOnTouchListener {
 
-    private void setupMap() {
-        if (mMapView != null) {
-            Basemap.Type basemapType = Basemap.Type.TOPOGRAPHIC;
-            double latitude = 36.813102;
-            double longitude = 10.129154;
-            int levelOfDetail = 13;
-            ArcGISMap map = new ArcGISMap(basemapType, latitude, longitude, levelOfDetail);
-            ArcGISRuntimeEnvironment.setLicense(getResources().getString(R.string.arcgis_license_key));
-
-            mMapView.setMap(map);
+        public ShowCoordinatesMapTouchListener(Context context, MapView mapView) {
+            super(context, mapView);
         }
+
+        /**
+         * Overrides the onSingleTapConfirmed gesture on the MapView, showing formatted coordinates of the tapped location.
+         * @param e the motion event
+         * @return true if the listener has consumed the event; false otherwise
+         */
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            // convert the screen location where user tapped into a map point
+            Point tapPoint = mMapView.screenToLocation(new android.graphics.Point((int) e.getX(), (int) e.getY()));
+            toCoordinateNotationFromPoint(tapPoint);
+            return true;
+        }
+
     }
+
     @Override
     protected void onPause() {
-        if (mMapView != null) {
-            mMapView.pause();
-        }
         super.onPause();
+        mMapView.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mMapView != null) {
-            mMapView.resume();
-        }
+        mMapView.resume();
     }
 
     @Override
     protected void onDestroy() {
-        if (mMapView != null) {
-            mMapView.dispose();
-        }
         super.onDestroy();
+        mMapView.dispose();
     }
-
-
-    private void createPointGraphics() {
-        Point point = new Point(36.8279039, 10.1505018, SpatialReferences.getWgs84());
-        SimpleMarkerSymbol pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.rgb(226, 119, 40), 10.0f);
-        pointSymbol.setOutline(new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 2.0f));
-        Graphic pointGraphic = new Graphic(point, pointSymbol);
-        mGraphicsOverlay.getGraphics().add(pointGraphic);
-    }
-    private void createPolylineGraphics() {
-        PointCollection polylinePoints = new PointCollection(SpatialReferences.getWgs84());
-        polylinePoints.add(new Point(36.763353, 10.233574));
-        polylinePoints.add(new Point(36.733092, 10.289879));
-        Polyline polyline = new Polyline(polylinePoints);
-        SimpleLineSymbol polylineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 3.0f);
-        Graphic polylineGraphic = new Graphic(polyline, polylineSymbol);
-        mGraphicsOverlay.getGraphics().add(polylineGraphic);
-    }
-    private void createPolygonGraphics() {
-        PointCollection polygonPoints = new PointCollection(SpatialReferences.getWgs84());
-        polygonPoints.add(new Point(-118.70372100524446, 34.03519536420519));
-        polygonPoints.add(new Point(-118.71766916267414, 34.03505116445459));
-        polygonPoints.add(new Point(-118.71923322580597, 34.04919407570509));
-        polygonPoints.add(new Point(-118.71631129436038, 34.04915962906471));
-        polygonPoints.add(new Point(-118.71526020370266, 34.059921300916244));
-        polygonPoints.add(new Point(-118.71153226844807, 34.06035488360282));
-        polygonPoints.add(new Point(-118.70803735010169, 34.05014385296186));
-        polygonPoints.add(new Point(-118.69877903513455, 34.045182336992816));
-        polygonPoints.add(new Point(-118.6979656552508, 34.040267760924316));
-        polygonPoints.add(new Point(-118.70259112469694, 34.038800278306674));
-        polygonPoints.add(new Point(-118.70372100524446, 34.03519536420519));
-        Polygon polygon = new Polygon(polygonPoints);
-        SimpleFillSymbol polygonSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, Color.rgb(226, 119, 40),
-                new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 2.0f));
-        Graphic polygonGraphic = new Graphic(polygon, polygonSymbol);
-        mGraphicsOverlay.getGraphics().add(polygonGraphic);
-    }
-
 }

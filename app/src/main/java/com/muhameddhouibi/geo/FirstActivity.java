@@ -3,13 +3,21 @@ package com.muhameddhouibi.geo;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.ArcGISRuntimeException;
+import com.esri.arcgisruntime.geometry.CoordinateFormatter;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
@@ -17,12 +25,14 @@ import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.google.android.material.snackbar.Snackbar;
 
 public class FirstActivity extends AppCompatActivity {
     private MapView mMapView;
@@ -30,6 +40,8 @@ public class FirstActivity extends AppCompatActivity {
     private Button btnStreet ;
     private Button btnImagerie ;
     private Button btnTopographie ;
+    private Graphic coordinateLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,19 +75,12 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
         setupMap();
-        createGraphicsOverlay();
-        createPointGraphics();
-        createPolylineGraphics();
-        createPolygonGraphics();
+        mMapView.setOnTouchListener(new ShowCoordinatesMapTouchListener(this, mMapView));
     }
-
-
-
     private void createGraphicsOverlay() {
         mGraphicsOverlay = new GraphicsOverlay();
         mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
     }
-
     private void setupMap() {
         if (mMapView != null) {
             Basemap.Type basemapType = Basemap.Type.STREETS;
@@ -85,6 +90,59 @@ public class FirstActivity extends AppCompatActivity {
             ArcGISMap map = new ArcGISMap(basemapType, latitude, longitude, levelOfDetail);
             ArcGISRuntimeEnvironment.setLicense(getResources().getString(R.string.arcgis_license_key));
             mMapView.setMap(map);
+
+
+            Point initialPoint = new Point(0,0, SpatialReferences.getWgs84());
+            coordinateLocation = new Graphic(initialPoint,
+            new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.rgb(226, 119, 40), 10.0f));
+            mMapView.getGraphicsOverlays().add(new GraphicsOverlay());
+            mMapView.getGraphicsOverlays().get(0).getGraphics().add(coordinateLocation);
+            toCoordinateNotationFromPoint(initialPoint);
+        }
+    }
+
+
+
+    /**
+     * A map touch listener that updates formatted coordinates when a user taps on a location in the associated MapView.
+     */
+    private class ShowCoordinatesMapTouchListener extends DefaultMapViewOnTouchListener {
+
+        public ShowCoordinatesMapTouchListener(Context context, MapView mapView) {
+            super(context, mapView);
+        }
+
+        /**
+         * Overrides the onSingleTapConfirmed gesture on the MapView, showing formatted coordinates of the tapped location.
+         * @param e the motion event
+         * @return true if the listener has consumed the event; false otherwise
+         */
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            // convert the screen location where user tapped into a map point
+            Point tapPoint = mMapView.screenToLocation(new android.graphics.Point((int) e.getX(), (int) e.getY()));
+            toCoordinateNotationFromPoint(tapPoint);
+            return true;
+        }
+
+    }
+    private void toCoordinateNotationFromPoint(Point newLocation) {
+        if ((newLocation != null) && (! newLocation.isEmpty())) {
+            coordinateLocation.setGeometry(newLocation);
+
+            try {
+                // use CoordinateFormatter to convert to Latitude Longitude, formatted as Decimal Degrees
+               String mLatLongDDValue = CoordinateFormatter.toLatitudeLongitude(newLocation,
+                        CoordinateFormatter.LatitudeLongitudeFormat.DECIMAL_DEGREES, 4);
+                Toast toast=Toast. makeText(getApplicationContext(),mLatLongDDValue,Toast. LENGTH_SHORT);
+                toast. show();
+
+            }
+            catch (ArcGISRuntimeException convertException) {
+                String message = String.format("%s Point at '%s'\n%s", getString(R.string.failed_convert),
+                        newLocation.toString(), convertException.getMessage());
+                Snackbar.make(mMapView, message, Snackbar.LENGTH_SHORT).show();
+            }
         }
     }
     @Override
@@ -110,45 +168,5 @@ public class FirstActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
-
-    private void createPointGraphics() {
-        Point point = new Point(36.8279039, 10.1505018, SpatialReferences.getWgs84());
-        //mMapView.setOnClickListener();
-
-        SimpleMarkerSymbol pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.rgb(226, 119, 40), 10.0f);
-        pointSymbol.setOutline(new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 2.0f));
-        Graphic pointGraphic = new Graphic(point, pointSymbol);
-        mGraphicsOverlay.getGraphics().add(pointGraphic);
-    }
-    private void createPolylineGraphics() {
-        PointCollection polylinePoints = new PointCollection(SpatialReferences.getWgs84());
-        polylinePoints.add(new Point(36.763353, 10.233574));
-        polylinePoints.add(new Point(36.733092, 10.289879));
-        Polyline polyline = new Polyline(polylinePoints);
-        SimpleLineSymbol polylineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 3.0f);
-        Graphic polylineGraphic = new Graphic(polyline, polylineSymbol);
-        mGraphicsOverlay.getGraphics().add(polylineGraphic);
-    }
-    private void createPolygonGraphics() {
-        PointCollection polygonPoints = new PointCollection(SpatialReferences.getWgs84());
-        polygonPoints.add(new Point(-118.70372100524446, 34.03519536420519));
-        polygonPoints.add(new Point(-118.71766916267414, 34.03505116445459));
-        polygonPoints.add(new Point(-118.71923322580597, 34.04919407570509));
-        polygonPoints.add(new Point(-118.71631129436038, 34.04915962906471));
-        polygonPoints.add(new Point(-118.71526020370266, 34.059921300916244));
-        polygonPoints.add(new Point(-118.71153226844807, 34.06035488360282));
-        polygonPoints.add(new Point(-118.70803735010169, 34.05014385296186));
-        polygonPoints.add(new Point(-118.69877903513455, 34.045182336992816));
-        polygonPoints.add(new Point(-118.6979656552508, 34.040267760924316));
-        polygonPoints.add(new Point(-118.70259112469694, 34.038800278306674));
-        polygonPoints.add(new Point(-118.70372100524446, 34.03519536420519));
-        Polygon polygon = new Polygon(polygonPoints);
-        SimpleFillSymbol polygonSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, Color.rgb(226, 119, 40),
-                new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.BLUE, 2.0f));
-        Graphic polygonGraphic = new Graphic(polygon, polygonSymbol);
-        mGraphicsOverlay.getGraphics().add(polygonGraphic);
-    }
-
-
 }
+

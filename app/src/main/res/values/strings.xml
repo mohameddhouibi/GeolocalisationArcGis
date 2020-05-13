@@ -3,4 +3,25 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>
+
+
+    <string name="latlong_dd_label">Decimal Degrees:</string>
+    <string name="latlong_dms_label">Degrees, Minutes, Seconds:</string>
+    <string name="utm_label">UTM:</string>
+    <string name="usng_label">USNG:</string>
+
+    <string name="enter_latlong_message">Enter Latitude, Longitude:</string>
+    <string name="enter_utm_message">Enter UTM:</string>
+    <string name="enter_usng_message">Enter US National Grid:</string>
+
+    <string name="unsupported_message">Unsupported option</string>
+    <string name="failed_convert">Failed to convert</string>
+    <string name="set_location">Set Location</string>
+
+    <string name="basemap_url">https://wi.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer</string>
+    <string name="pointButtonDescription" />
+    <string name="polygonButtonDescription" />
+    <string name="freehandPolyButtonDescription" />
+    <string name="freehandLineButtonDescription" />
+    <string name="polylineButtonDescription" />
 </resources>

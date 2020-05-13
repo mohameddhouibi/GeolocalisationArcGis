@@ -1,46 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".ThirdActivity">
-        <LinearLayout
-            android:id="@+id/linear"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum= "3"
-            >
 
-            <Button
-                android:id="@+id/Street3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
 
-                android:text="Street "></Button>
-            <Button
-                android:id="@+id/IMAGERY3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+    <!-- MapView -->
+    <com.esri.arcgisruntime.mapping.view.MapView
+        android:id="@+id/mapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/gridView">
+    </com.esri.arcgisruntime.mapping.view.MapView>
 
-                android:text="IMAGERY "></Button>
-            <Button
-                android:id="@+id/TOPOGRAPHIC3"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+    <GridLayout
+        android:id="@+id/gridView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:columnCount="2"
+        android:orientation="horizontal"
+        android:padding="@dimen/coordinate_grid_padding"
+        android:rowCount="5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mapView">
 
-                android:text="TOPOGRAPHIC "></Button>
-        </LinearLayout>
+        <TextView
+            android:layout_column="0"
+            android:layout_gravity="end|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="0"
+            android:text="@string/latlong_dd_label"
+            android:textAlignment="textEnd"/>
 
-        <com.esri.arcgisruntime.mapping.view.MapView
-            android:layout_below="@+id/linear"
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </com.esri.arcgisruntime.mapping.view.MapView>
+        <TextView
+            android:layout_column="0"
+            android:layout_gravity="end|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="1"
+            android:text="@string/latlong_dms_label"
+            android:textAlignment="textEnd"/>
 
-    </RelativeLayout>
+        <TextView
+            android:layout_column="0"
+            android:layout_gravity="end|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="2"
+            android:text="@string/utm_label"
+            android:textAlignment="textEnd"/>
+
+        <TextView
+            android:layout_column="0"
+            android:layout_gravity="end|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="3"
+            android:text="@string/usng_label"
+            android:textAlignment="textEnd"/>
+
+        <TextView
+            android:id="@+id/latLongDDNotation"
+            android:layout_column="1"
+            android:layout_gravity="start|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="0"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+        <TextView
+            android:id="@+id/latLongDMSNotation"
+            android:layout_column="1"
+            android:layout_gravity="start|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="1"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+        <TextView
+            android:id="@+id/utmNotation"
+            android:layout_column="1"
+            android:layout_gravity="start|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="2"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+        <TextView
+            android:id="@+id/usngNotation"
+            android:layout_column="1"
+            android:layout_gravity="start|top"
+            android:layout_margin="@dimen/coordinate_text_margin"
+            android:layout_row="3"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
